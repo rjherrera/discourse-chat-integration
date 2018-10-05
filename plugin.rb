@@ -20,6 +20,11 @@ after_initialize do
     Jobs.enqueue_in(time, :notify_chats, post_id: post.id)
   end
 
+  on(:accepted_solution) do |post|
+    time = SiteSetting.chat_integration_delay_seconds.seconds
+    Jobs.enqueue_in(time, :notify_chats, post_id: post.id)
+  end
+
   add_admin_route 'chat_integration.menu_title', 'chat'
 
   AdminDashboardData.add_problem_check do
