@@ -8,6 +8,17 @@ module DiscourseChat
     def self.trigger_notifications(post_id)
       post = Post.find_by(id: post_id)
 
+      # Call the special solved manager
+      if post.custom_fields["is_accepted_answer"]
+        rule = DiscourseChat::Rule.with_type('normal').with_category_id(nil).with_filter(:mute)
+        rule = rule.first
+        channel = rule.channel
+        provider = ::DiscourseChat::Provider.get_by_name(channel.provider)
+        is_enabled = ::DiscourseChat::Provider.is_enabled(provider)
+        provider.trigger_notification(post, channel)
+      end
+
+
       # Abort if the chat_user doesn't have permission to see the post
       return if !guardian.can_see?(post)
 
