@@ -25,11 +25,15 @@ module DiscourseChat::Provider::SlackProvider
     end
 
     topic = post.topic
+    category = topic.category
+    solved = post.custom_fields["is_accepted_answer"].present?
 
-    category = ''
-    if topic.category
-      category = (topic.category.parent_category) ? "[#{topic.category.parent_category.name}/#{topic.category.name}]" : "[#{topic.category.name}]"
-    end
+    category =
+      if category.nil? or category.uncategorized?
+        ""
+      else
+        (category.parent_category ? "[#{category.parent_category.name}/" : "[") + "#{category.name}]"
+      end
 
     icon_url =
       if !SiteSetting.chat_integration_slack_icon_url.blank?
@@ -45,6 +49,11 @@ module DiscourseChat::Provider::SlackProvider
       attachments: []
     }
 
+    title = "#{topic.title} #{category} #{topic.tags.present? ? topic.tags.map(&:name).join(', ') : ''}"
+    if solved
+      title = "[SOLVED] #{topic.title}"
+    end
+
     summary = {
       fallback: "#{topic.title} - #{display_name}",
       author_name: display_name,
@@ -52,7 +61,7 @@ module DiscourseChat::Provider::SlackProvider
       color: topic.category ? "##{topic.category.color}" : nil,
       text: excerpt(post),
       mrkdwn_in: ["text"],
-      title: "#{topic.title} #{(category == '[uncategorized]') ? '' : category} #{topic.tags.present? ? topic.tags.map(&:name).join(', ') : ''}",
+      title: title,
       title_link: post.full_url,
       thumb_url: post.full_url
     }
