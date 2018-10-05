@@ -18,6 +18,8 @@ class DiscourseChat::Rule < DiscourseChat::PluginModel
     where("value::json->>'group_id' IN (?)", group_id.map!(&:to_s))
   end
 
+  scope :with_filter, ->(filter) { where("value::json->>'filter'=?", filter.to_s) }
+
   scope :order_by_precedence, -> {
     order("
       CASE
