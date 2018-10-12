@@ -10,7 +10,7 @@ module DiscourseChat
 
       # Call the special solved manager
       if post.custom_fields["is_accepted_answer"]
-        rule = DiscourseChat::Rule.with_type('normal').with_category_id(nil).with_filter(:mute)
+        rule = DiscourseChat::Rule.with_type('normal').with_category_id(nil).with_filter(:follow)
         rule = rule.first
         channel = rule.channel
         provider = ::DiscourseChat::Provider.get_by_name(channel.provider)
